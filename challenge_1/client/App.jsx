@@ -8,27 +8,45 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      events: [],
-      searchResults: [{"date": "-300", "description": "Pilgrims travel to the healing temples of Asclepieion to be cured of their ills. After a ritual purification the followers bring offerings or sacrifices.", "lang": "en", "category1": "By place", "category2": "Greece", "granularity": "year"}, 
-      {"date": "-300", "description": "Pyrrhus, the King of Epirus, is taken as a hostage to Egypt after the Battle of Ipsus and makes a diplomatic marriage with the princess Antigone, daughter of Ptolemy and Berenice.", "lang": "en", "category1": "By place", "category2": "Egypt", "granularity": "year"}, 
-      {"date": "-300", "description": "Ptolemy concludes an alliance with King Lysimachus of Thrace and gives him his daughter Arsinoe II in marriage.", "lang": "en", "category1": "By place", "category2": "Egypt", "granularity": "year"}]
+      searchWords: undefined,
+      pageNumber: undefined,
+      pageCount: undefined,
+      searchResults: []
     };
     this.searchEvents = this.searchEvents.bind(this);
+    this.changePage = this.changePage.bind(this);
+  }
+
+  getEvents(searchWords, pageNumber) {
+    axios.get(`/events?q=${searchWords}&_page=${pageNumber}`)
+      . then((response) => {
+        let pageLinks = response.headers.link.split(', ');
+        let lastPageLink = pageLinks[pageLinks.length -1];
+        let lastPageNumber = Number(lastPageLink.match(/&_page=\d+>/)[0].match(/\d+/)[0]);
+        this.setState({pageCount: lastPageNumber, searchResults: response.data});
+      })
+      .catch((err) => {
+        console.log('Error:', err);
+      });
   }
 
   searchEvents() {
-    console.log('search input:', document.getElementById('search-input').value);
-    // get events from server, update results on state
+    let searchWords = document.getElementById('search-input').value;
+    this.setState({
+      searchWords: searchWords,
+      pageNumber: 1
+    }, () => {
+      this.getEvents(this.state.searchWords, this.state.pageNumber)
+    });
   }
 
-  componentDidMount() {
-    axios.get('/events')
-      .then((response) => {
-        this.setState({events: response.data});
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+  changePage(data) {
+    let pageNumber = data.selected + 1;
+    this.setState({
+      pageNumber: pageNumber
+    }, () => {
+      this.getEvents(this.state.searchWords, this.state.pageNumber)
+    });
   }
 
   render() {
@@ -36,7 +54,7 @@ class App extends React.Component {
       <div>
         <h1>Historical Events Finder</h1>
         <Search searchEvents={this.searchEvents} />
-        <Results searchResults={this.state.searchResults} />
+        <Results searchResults={this.state.searchResults} pageCount={this.state.pageCount} changePage={this.changePage} />
       </div>
     );
   }
