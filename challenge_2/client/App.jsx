@@ -19,12 +19,7 @@ export default class App extends React.Component {
       type: 'line',
       data: {
         labels: this.state.labels,
-        datasets: [
-          {
-            label: 'BTC',
-            data: this.state.data
-          }
-        ]
+        datasets: [{label: 'BTC', data: this.state.data}]
       }
     });
   }
