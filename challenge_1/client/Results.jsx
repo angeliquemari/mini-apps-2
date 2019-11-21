@@ -8,7 +8,7 @@ export default function Results({searchResults, pageCount, changePage}) {
       <ul className="search-results">
       {searchResults.map((event, index) => {
         return (
-          <li key={index}>{JSON.stringify(event)}</li>
+        <li key={index}>{event.date}: {event.description}</li>
         );
       })}
       </ul>
