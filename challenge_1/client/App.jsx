@@ -19,11 +19,18 @@ class App extends React.Component {
 
   getEvents(searchWords, pageNumber) {
     axios.get(`/events?q=${searchWords}&_page=${pageNumber}`)
-      . then((response) => {
-        let pageLinks = response.headers.link.split(', ');
-        let lastPageLink = pageLinks[pageLinks.length -1];
-        let lastPageNumber = Number(lastPageLink.match(/&_page=\d+>/)[0].match(/\d+/)[0]);
-        this.setState({pageCount: lastPageNumber, searchResults: response.data});
+      .then((response) => {
+        if (response.headers.link) {
+          let pageLinks = response.headers.link.split(', ');
+          let lastPageLink = pageLinks[pageLinks.length - 1];
+          let lastPageNumber = Number(lastPageLink.match(/&_page=\d+>/)[0].match(/\d+/)[0]);
+          this.setState({
+            searchWords: searchWords,
+            pageNumber: pageNumber,
+            pageCount: lastPageNumber,
+            searchResults: response.data
+          });
+        }
       })
       .catch((err) => {
         console.log('Error:', err);
@@ -32,21 +39,12 @@ class App extends React.Component {
 
   searchEvents() {
     let searchWords = document.getElementById('search-input').value;
-    this.setState({
-      searchWords: searchWords,
-      pageNumber: 1
-    }, () => {
-      this.getEvents(this.state.searchWords, this.state.pageNumber)
-    });
+    this.getEvents(searchWords, 1);
   }
 
   changePage(data) {
     let pageNumber = data.selected + 1;
-    this.setState({
-      pageNumber: pageNumber
-    }, () => {
-      this.getEvents(this.state.searchWords, this.state.pageNumber)
-    });
+    this.getEvents(this.state.searchWords, pageNumber);
   }
 
   render() {

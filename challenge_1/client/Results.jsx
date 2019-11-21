@@ -5,11 +5,13 @@ export default function Results({searchResults, pageCount, changePage}) {
   return (
     <div>
       <h2>Search Results</h2>
+      <ul className="search-results">
       {searchResults.map((event, index) => {
         return (
-          <div key={index}>{event.date}: {event.description}</div>
+          <li key={index}>{JSON.stringify(event)}</li>
         );
       })}
+      </ul>
       {searchResults.length > 0 && <ReactPaginate
         pageCount={pageCount}
         pageRangeDisplayed={3}
@@ -17,6 +19,7 @@ export default function Results({searchResults, pageCount, changePage}) {
         previousLabel={'Previous'}
         nextLabel={'Next'}
         onPageChange={changePage}
+        containerClassName={'pagination'}
       />}
     </div>
   );
